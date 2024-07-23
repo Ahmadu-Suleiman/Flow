@@ -4,7 +4,7 @@ const app = express();
 
 // Lets simulate a database
 const techEvents = []; // Events in the database
-const users = ["+2348181114412", "+2348181114411"]; // User phone numbers in the database
+const users = ["+2348138445664", "+2348027020206"]; // User phone numbers in the database
 
 app.use(express.urlencoded({ extended: true })); // Allows us receive the data sent from the event adding form
 
@@ -72,20 +72,26 @@ app.post("/event", (req, res) => {
 
 // Route to receive SMS from our users
 app.post("/incoming-messages", async (req, res) => {
-  const formData = req.body;
+  const formData = req.body
+  console.log(formData); // Logging the form data
 
   // To RSVP for an event, we expect the user to send the id of the event via SMS
-  const eventId = +formData.text;
+  const eventId = formData.text;
   const event = techEvents.find((ev) => ev.id == eventId); // Search database for an event with the matching Id
 
   // validate event Id
   if (isNaN(eventId) || !event) {
-    await sendSms(formData.from, "Please provide a valid event Id.");
-    res.sendStatus(400);
+    await sendSms(
+      formData.from,
+      `${eventId} not valid. Please provide a valid event Id.`
+    );
+    res.sendStatus(200);
+  } else {
+    console.log(techEvents); // Let the user know everything went well
+    console.log(techEvents); // Let the user know everything went well
+    await sendSms(formData.from, `You have saved a spot at ${event.name}`); // Let the user know everything went well
+    res.status(200).send({ msg: "successful" });
   }
-
-  await sendSms(formData.from, `You have saved a spot at ${event.name}`); // Let the user know everything went well
-  res.status(200).send({ msg: "successful" });
 });
 
 const port = 3000; // the port must match this value when port forwarding
